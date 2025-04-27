@@ -1,2 +1,30 @@
-# Simple_Packet_Tracer
-Simple Packet Tracer 프로젝트
+# 🛰️ Simple Packet Tracer
+
+## 프로젝트 소개
+Spring Boot 기반으로 개발 중인 네트워크 패킷 캡처 및 분석 프로그램  
+Cisco Packet Tracer 사용 경험을 바탕으로, 실제 패킷을 캡처하고 실시간으로 분석 및 시각화하는 기능을 직접 구현
+
+## 주요 기능
+- 네트워크 인터페이스 조회
+- 실시간 패킷 캡처 (Pcap4J 라이브러리 사용)
+- IP, 포트, 프로토콜 필터링
+- TCP/UDP/ICMP 패킷 헤더 분석
+- WebSocket을 통한 실시간 데이터 반영
+- 패킷 통계 수집 및 Chart.js를 이용한 실시간 시각화
+- 가상 장비 추가 및 연결 기능
+
+## 개발 환경
+- Java 17
+- Spring Boot 3.4.5
+- Gradle
+- Pcap4J
+- Chart.js
+- AWS EC2 (배포 테스트용)
+
+## 진행 기간
+- 2025년 4월 ~ 7월 (3개월)
+
+## 목표
+- 실제 패킷 캡처 및 분석 시스템을 직접 구축하여 네트워크에 대한 이해를 심화
+- 실시간 데이터 처리 및 백엔드 API 설계 경험 강화
+- 포트폴리오용 시연 영상 및 프로젝트 문서화 완료
