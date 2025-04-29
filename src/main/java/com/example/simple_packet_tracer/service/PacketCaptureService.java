@@ -11,7 +11,7 @@ public class PacketCaptureService {
 
     private static final int SNAPLEN = 65536; // 최대 패킷 크기
     private static final int READ_TIMEOUT = 50; // 밀리초 단위
-    private static final int MAX_PACKET_COUNT = 10; // 캡처할 패킷 수
+    private static final int MAX_PACKET_COUNT = 5; // 캡처할 패킷 수
 
 
     public List<PcapNetworkInterface> listNetworkInterfaces() throws PcapNativeException{
@@ -20,13 +20,14 @@ public class PacketCaptureService {
 
     public void capturePackets(String interfaceName, String bpfFilter) throws PcapNativeException, NotOpenException {
         List<PcapNetworkInterface> interfaces = Pcaps.findAllDevs();
+        String normalized = interfaceName.replaceAll("\\\\\\\\", "\\\\"); // \\ → \
         if (interfaces == null || interfaces.isEmpty()) {
             System.out.println("네트워크 인터페이스를 찾을 수 없습니다.");
             return;
         }
 
         PcapNetworkInterface selectedNif = interfaces.stream()
-                .filter(nif -> nif.getName().equals(interfaceName))
+                .filter(nif -> nif.getName().equals(normalized))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("인터페이스를 찾을 수 없습니다: " + interfaceName));
 
