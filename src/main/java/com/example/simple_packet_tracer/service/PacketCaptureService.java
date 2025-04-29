@@ -13,37 +13,41 @@ public class PacketCaptureService {
     private static final int READ_TIMEOUT = 50; // 밀리초 단위
     private static final int MAX_PACKET_COUNT = 10; // 캡처할 패킷 수
 
-    public void listNetworkInterFace() throws PcapNativeException{
-        List<PcapNetworkInterface> interfaces = Pcaps.findAllDevs();
-        if (interfaces == null || interfaces.isEmpty()) {
-            System.out.println("네트워크 인터페이스를 찾을 수 없음");
-            return;
-        }
 
-        System.out.println("네트워크 인터페이스 : ");
-        for (PcapNetworkInterface nif : interfaces) {
-            System.out.println(nif.getName() + " : " + nif.getDescription());
-        }
+    public List<PcapNetworkInterface> listNetworkInterfaces() throws PcapNativeException{
+        return Pcaps.findAllDevs();
     }
 
-    public void capturePackets() throws PcapNativeException, NotOpenException{
+    public void capturePackets(String interfaceName, String bpfFilter) throws PcapNativeException, NotOpenException {
         List<PcapNetworkInterface> interfaces = Pcaps.findAllDevs();
         if (interfaces == null || interfaces.isEmpty()) {
-            System.out.println("네트워크를 찾을 수 없습니다.");
+            System.out.println("네트워크 인터페이스를 찾을 수 없습니다.");
             return;
         }
 
-        // 첫 번째 네트워크 인터페이스 사용
-        PcapNetworkInterface nif = interfaces.get(0);
-        System.out.println("인터페이스 캡쳐 : " + nif.getName());
+        PcapNetworkInterface selectedNif = interfaces.stream()
+                .filter(nif -> nif.getName().equals(interfaceName))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("인터페이스를 찾을 수 없습니다: " + interfaceName));
 
-        PcapHandle handle = nif.openLive(SNAPLEN, PcapNetworkInterface.PromiscuousMode.PROMISCUOUS, READ_TIMEOUT);
+        System.out.println("선택된 인터페이스로 캡처 중: " + selectedNif.getName());
+
+        PcapHandle handle = selectedNif.openLive(
+                SNAPLEN,
+                PcapNetworkInterface.PromiscuousMode.PROMISCUOUS,
+                READ_TIMEOUT
+        );
+
+        if (bpfFilter != null && !bpfFilter.isEmpty()) {
+            handle.setFilter(bpfFilter, BpfProgram.BpfCompileMode.OPTIMIZE);
+            System.out.println("BPF 필터 적용됨: " + bpfFilter);
+        }
 
         int packetCount = 0;
         while (packetCount < MAX_PACKET_COUNT) {
             Packet packet = handle.getNextPacket();
             if (packet != null) {
-                System.out.println("Packet captured : " + packet);
+                System.out.println("캡처된 패킷: " + packet);
                 packetCount++;
             }
         }
