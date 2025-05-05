@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Packet Tracer - 실시간 패킷</title>
+    <style>
+        body { font-family: monospace; background-color: #111; color: #0f0; padding: 20px; }
+        #log { white-space: pre-wrap; background: #000; padding: 1em; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
+    </style>
+</head>
+<body>
+<h2>📡 실시간 패킷 로그</h2>
+<div id="log">연결 대기 중...</div>
+
+<script>
+    const logDiv = document.getElementById("log");
+    const socket = new WebSocket("ws://localhost:8081/ws/packets");
+
+    socket.onopen = () => {
+        logDiv.innerText = "✅ WebSocket 연결됨\n";
+    };
+
+    socket.onmessage = (event) => {
+        const msg = event.data;
+        const time = new Date().toLocaleTimeString();
+        logDiv.innerText = `[${time}]\n` + msg + "\n\n" + logDiv.innerText;
+    };
+
+    socket.onclose = () => {
+        logDiv.innerText = "❌ WebSocket 연결 종료\n" + logDiv.innerText;
+    };
+
+    socket.onerror = (err) => {
+        logDiv.innerText = `🚨 오류 발생: ${err}\n` + logDiv.innerText;
+    };
+</script>
+</body>
+</html>

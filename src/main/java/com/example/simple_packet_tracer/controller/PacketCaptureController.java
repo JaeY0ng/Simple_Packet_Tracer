@@ -1,6 +1,7 @@
 package com.example.simple_packet_tracer.controller;
 
 
+import com.example.simple_packet_tracer.dto.LayeredPacketDto;
 import com.example.simple_packet_tracer.service.PacketCaptureService;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PcapNativeException;
@@ -33,11 +34,10 @@ public class PacketCaptureController {
     }
 
     @GetMapping("/capture")
-    public String capturePackets(
+    public List<LayeredPacketDto> capturePackets(
             @RequestParam String interfaceName,
             @RequestParam(required = false) String bpfFilter
-    ) throws PcapNativeException, NotOpenException {
-        packetCaptureService.capturePackets(interfaceName, bpfFilter);
-        return "패킷 캡처 완료";
+    ) throws PcapNativeException, NotOpenException, InterruptedException {
+        return packetCaptureService.capturePackets(interfaceName, bpfFilter);
     }
 }
