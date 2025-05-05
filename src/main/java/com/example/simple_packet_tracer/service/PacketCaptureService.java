@@ -62,7 +62,7 @@ public class PacketCaptureService {
                 System.out.println("캡처된 패킷 : " + packet);
                 try {
                     String json = objectMapper.writeValueAsString(dto);
-                    webSocketHandler.sendPacketMessage(json); // 💥 WebSocket 전송
+                    webSocketHandler.sendPacketMessage(json); // WebSocket 전송
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

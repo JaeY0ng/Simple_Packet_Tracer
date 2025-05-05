@@ -1,38 +1,146 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Simple Packet Tracer - 실시간 패킷</title>
+    <title>Simple Packet Tracer</title>
     <style>
         body { font-family: monospace; background-color: #111; color: #0f0; padding: 20px; }
-        #log { white-space: pre-wrap; background: #000; padding: 1em; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
+        #log { white-space: pre-wrap; background: #000; padding: 1em; border-radius: 8px; max-height: 70vh; overflow-y: auto; margin-top: 10px; }
+        select, input, button { margin-right: 10px; margin-top: 10px; padding: 4px; }
     </style>
 </head>
 <body>
 <h2>📡 실시간 패킷 로그</h2>
-<div id="log">연결 대기 중...</div>
+
+<!-- 인터페이스 선택 -->
+<button onclick="loadInterfaces()">인터페이스 조회</button>
+<select id="interfaceSelect">
+    <option disabled selected>인터페이스 선택</option>
+</select>
+
+<!-- 필터 입력 -->
+<input type="text" id="filterInput" placeholder="ex: tcp, udp, port 53" />
+<button onclick="startCapture()">캡처 시작</button>
+
+<!-- 로그 영역 -->
+<div id="log"></div>
 
 <script>
-    const logDiv = document.getElementById("log");
-    const socket = new WebSocket("ws://localhost:8081/ws/packets");
+    let socket;
 
-    socket.onopen = () => {
-        logDiv.innerText = "✅ WebSocket 연결됨\n";
-    };
+    function loadInterfaces() {
+        fetch("http://localhost:8081/interface")
+            .then(res => {
+                if (!res.ok) throw new Error(`응답 오류 (${res.status})`);
+                return res.json();
+            })
+            .then(data => {
+                const select = document.getElementById("interfaceSelect");
+                select.innerHTML = '<option disabled selected>인터페이스 선택</option>';
+                data.forEach((iface) => {
+                    const option = document.createElement("option");
+                    option.value = iface.split(" : ")[0];
+                    option.textContent = iface;
+                    select.appendChild(option);
+                });
+                log("✅ 인터페이스 목록 로딩 완료");
+            })
+            .catch(err => {
+                log("❌ 인터페이스 조회 실패: " + err.message);
+            });
+    }
 
-    socket.onmessage = (event) => {
-        const msg = event.data;
-        const time = new Date().toLocaleTimeString();
-        logDiv.innerText = `[${time}]\n` + msg + "\n\n" + logDiv.innerText;
-    };
+    function startCapture() {
+        const selectedInterface = document.getElementById("interfaceSelect").value;
+        const filter = document.getElementById("filterInput").value;
 
-    socket.onclose = () => {
-        logDiv.innerText = "❌ WebSocket 연결 종료\n" + logDiv.innerText;
-    };
+        if (!selectedInterface) {
+            alert("인터페이스를 선택해주세요.");
+            return;
+        }
 
-    socket.onerror = (err) => {
-        logDiv.innerText = `🚨 오류 발생: ${err}\n` + logDiv.innerText;
-    };
+        // 캡처 요청
+        fetch(`http://localhost:8081/capture?interfaceName=${encodeURIComponent(selectedInterface)}&bpfFilter=${encodeURIComponent(filter)}`)
+            .then(res => {
+                if (!res.ok) throw new Error(`캡처 요청 실패 (${res.status})`);
+                log("📤 캡처 요청 전송됨. WebSocket 수신 대기 중...");
+                openSocket();
+            })
+            .catch(err => {
+                log("❌ 캡처 요청 실패: " + err.message);
+            });
+    }
+
+    function openSocket() {
+        if (socket && socket.readyState !== WebSocket.CLOSED) {
+            socket.close();
+        }
+
+        socket = new WebSocket("ws://localhost:8081/ws/packets");
+
+        socket.onopen = () => {
+            log("✅ WebSocket 연결됨");
+        };
+
+        socket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                const time = new Date().toLocaleTimeString();
+
+                const lines = [`[${time}] 패킷 수신:`];
+
+                const layers = data.layers || {};
+                if (layers.Ethernet) {
+                    const eth = layers.Ethernet;
+                    lines.push(`  🔌 Ethernet`);
+                    lines.push(`    SRC MAC: ${eth.srcMac}`);
+                    lines.push(`    DST MAC: ${eth.dstMac}`);
+                    lines.push(`    TYPE   : ${eth.type}`);
+                }
+
+                if (layers.IPv4) {
+                    const ip = layers.IPv4;
+                    lines.push(`  🌐 IPv4`);
+                    lines.push(`    SRC IP : ${ip.srcIp}`);
+                    lines.push(`    DST IP : ${ip.dstIp}`);
+                    lines.push(`    PROTO  : ${ip.protocol}`);
+                }
+
+                if (layers.TCP) {
+                    const tcp = layers.TCP;
+                    lines.push(`  📦 TCP`);
+                    lines.push(`    SRC PORT: ${tcp.srcPort}`);
+                    lines.push(`    DST PORT: ${tcp.dstPort}`);
+                }
+
+                if (layers.UDP) {
+                    const udp = layers.UDP;
+                    lines.push(`  📦 UDP`);
+                    lines.push(`    SRC PORT: ${udp.srcPort}`);
+                    lines.push(`    DST PORT: ${udp.dstPort}`);
+                }
+
+                log(lines.join('\n'));
+            } catch (e) {
+                log(`⚠️ JSON 파싱 실패: ${e.message}\n원본 데이터: ${event.data}`);
+            }
+        };
+
+
+        socket.onerror = (e) => log(`🚨 WebSocket 오류`);
+        socket.onclose = () => log("❌ WebSocket 연결 종료됨");
+    }
+
+    function log(message) {
+        const logDiv = document.getElementById("log");
+
+        const entry = document.createElement("pre");
+        entry.textContent = message;
+        logDiv.appendChild(entry);
+
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
 </script>
 </body>
 </html>

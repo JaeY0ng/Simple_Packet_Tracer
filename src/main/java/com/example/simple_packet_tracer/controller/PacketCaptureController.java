@@ -33,11 +33,16 @@ public class PacketCaptureController {
                 .collect(Collectors.toList());
     }
 
+
     @GetMapping("/capture")
     public List<LayeredPacketDto> capturePackets(
             @RequestParam String interfaceName,
             @RequestParam(required = false) String bpfFilter
     ) throws PcapNativeException, NotOpenException, InterruptedException {
-        return packetCaptureService.capturePackets(interfaceName, bpfFilter);
+        // 필터 디코딩
+        String decodedFilter = bpfFilter != null ? URLDecoder.decode(bpfFilter, StandardCharsets.UTF_8) : null;
+
+        System.out.println("🎯 클라이언트 필터 값: " + decodedFilter); // 디버그용
+        return packetCaptureService.capturePackets(interfaceName, decodedFilter);
     }
 }
