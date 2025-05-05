@@ -191,7 +191,6 @@ public class PacketCaptureService {
                 dto.addLayer("HTTP", httpFields);
             }
         }
-
         return dto;
     }
 }
