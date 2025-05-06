@@ -1,6 +1,8 @@
 package com.example.simple_packet_tracer.dto;
 
+import lombok.Data;
 
+@Data
 public class PacketInfoDto {
     private String timestamp;
     private String srcIp;

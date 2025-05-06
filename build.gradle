@@ -30,6 +30,9 @@ dependencies {
 
     implementation 'org.pcap4j:pcap4j-core:1.8.0'
     runtimeOnly 'org.pcap4j:pcap4j-packetfactory-static:1.8.0'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
