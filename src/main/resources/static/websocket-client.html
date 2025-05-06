@@ -120,6 +120,13 @@
                     lines.push(`    DST PORT: ${udp.dstPort}`);
                 }
 
+                if (layers.ICMP) {
+                    const icmp = layers.ICMP;
+                    lines.push(`  🛰️ ICMP`);
+                    lines.push(`    TYPE: ${icmp.type}`);
+                    lines.push(`    CODE: ${icmp.code}`);
+                }
+
                 log(lines.join('\n'));
             } catch (e) {
                 log(`⚠️ JSON 파싱 실패: ${e.message}\n원본 데이터: ${event.data}`);

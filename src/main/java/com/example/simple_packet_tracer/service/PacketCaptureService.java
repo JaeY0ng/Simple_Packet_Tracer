@@ -140,6 +140,15 @@ public class PacketCaptureService {
             dto.addLayer("UDP", udpFields);
         }
 
+        // ✅ ICMP 추가
+        IcmpV4CommonPacket icmp = packet.get(IcmpV4CommonPacket.class);
+        if (icmp != null) {
+            Map<String, Object> icmpFields = new HashMap<>();
+            icmpFields.put("type", icmp.getHeader().getType().value());
+            icmpFields.put("code", icmp.getHeader().getCode().value());
+            dto.addLayer("ICMP", icmpFields);
+        }
+
         // DNS 분석
         if (udp != null && (udp.getHeader().getSrcPort().valueAsInt() == 53 || udp.getHeader().getDstPort().valueAsInt() == 53)) {
 
