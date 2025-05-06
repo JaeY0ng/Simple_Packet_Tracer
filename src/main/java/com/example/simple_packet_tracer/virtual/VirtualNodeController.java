@@ -23,8 +23,15 @@ public class VirtualNodeController {
 
     // 모든 노드 조회
     @GetMapping("/nodes")
-    public List<VirtualNode> getAllNodes() {
-        return networkService.getAllNodes();
+    public ResponseEntity<?> getAllNodes() {
+        List<VirtualNode> nodes = virtualNetworkService.getAllNodes();
+        if(nodes.isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message","노드가 존재하지 않습니다."));
+        }
+
+        return ResponseEntity.ok(nodes);
     }
 
     // 노드 추가
@@ -43,9 +50,15 @@ public class VirtualNodeController {
 
     // 노드 삭제
     @DeleteMapping("/nodes/{id}")
-    public ResponseEntity<Void> deleteNode(@PathVariable String id) {
+    public ResponseEntity<?> deleteNode(@PathVariable String id) {
         boolean removed = networkService.deleteNode(id);
-        return removed ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
+        if (removed) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(Map.of("message","노드 삭제가 완료 되었습니다"));
+        } else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message","존재 하지 않는 노드 입니다."));
+        }
     }
 
     // 링크 생성
@@ -57,8 +70,14 @@ public class VirtualNodeController {
 
     // 모든 링크 조회
     @GetMapping("/links")
-    public List<VirtualLink> getAllLinks() {
-        return networkService.getAllLinks();
+    public ResponseEntity<?> getAllLinks() {
+        List<VirtualLink> links = virtualNetworkService.getAllLinks();
+        if(links.isEmpty()){
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message","링크가 존재하지 않습니다."));
+        }
+        return ResponseEntity.ok(links);
     }
 
     // 노드와 연결된 링크 조회
@@ -76,8 +95,9 @@ public class VirtualNodeController {
 
     // 전체 초기화
     @DeleteMapping("/reset")
-    public ResponseEntity<Void> clearAll() {
+    public ResponseEntity<?> clearAll() {
         networkService.clearAllNodes();
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(Map.of("message","가상 네트워크 초기화 작업이 완료 되었습니다."));
     }
 }
