@@ -1,6 +1,8 @@
 package com.example.simple_packet_tracer.virtual;
 
 import com.example.simple_packet_tracer.virtual.dto.CreateLinkRequestDto;
+import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
+import com.example.simple_packet_tracer.virtual.service.VirtualNetworkService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -107,5 +109,10 @@ public class VirtualNodeController {
                 "links", networkService.getAllLinks()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/status")
+    public List<NodeStatusDto> getNodeStatusList() {
+        return networkService.getNodeStatusList();
     }
 }

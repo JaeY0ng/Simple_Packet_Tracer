@@ -1,8 +1,12 @@
-package com.example.simple_packet_tracer.virtual;
+package com.example.simple_packet_tracer.virtual.service;
 
+import com.example.simple_packet_tracer.virtual.VirtualLink;
+import com.example.simple_packet_tracer.virtual.VirtualNode;
+import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VirtualNetworkService {
@@ -63,5 +67,25 @@ public class VirtualNetworkService {
             }
         }
         return result;
+    }
+
+
+    // 노드 상태 리스트 생성
+    public List<NodeStatusDto> getNodeStatusList() {
+        return nodeMap.values().stream()
+                .map(node -> {
+                    String nodeId = node.getId();
+                    int connectionCount = countLinksForNode(nodeId);
+
+                    return new NodeStatusDto(nodeId, true, connectionCount); // isActive = true 고정
+                })
+                .collect(Collectors.toList());
+    }
+
+    // 연결 수 계산
+    private int countLinksForNode(String nodeId) {
+        return (int) links.stream()
+                .filter(link -> link.getNodeAId().equals(nodeId) || link.getNodeBId().equals(nodeId))
+                .count();
     }
 }
