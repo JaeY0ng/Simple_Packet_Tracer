@@ -14,17 +14,15 @@ import java.util.Optional;
 public class VirtualNodeController {
 
     private final VirtualNetworkService networkService;
-    private final VirtualNetworkService virtualNetworkService;
 
-    public VirtualNodeController(VirtualNetworkService networkService, VirtualNetworkService virtualNetworkService) {
+    public VirtualNodeController(VirtualNetworkService networkService) {
         this.networkService = networkService;
-        this.virtualNetworkService = virtualNetworkService;
     }
 
     // 모든 노드 조회
     @GetMapping("/nodes")
     public ResponseEntity<?> getAllNodes() {
-        List<VirtualNode> nodes = virtualNetworkService.getAllNodes();
+        List<VirtualNode> nodes = networkService.getAllNodes();
         if(nodes.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -64,14 +62,14 @@ public class VirtualNodeController {
     // 링크 생성
     @PostMapping("/links")
     public ResponseEntity<VirtualLink> createLink(@RequestBody CreateLinkRequestDto request) {
-        VirtualLink link = virtualNetworkService.createLink(request.getNodeAId(), request.getNodeBId());
+        VirtualLink link = networkService.createLink(request.getNodeAId(), request.getNodeBId());
         return new ResponseEntity<>(link, HttpStatus.CREATED);
     }
 
     // 모든 링크 조회
     @GetMapping("/links")
     public ResponseEntity<?> getAllLinks() {
-        List<VirtualLink> links = virtualNetworkService.getAllLinks();
+        List<VirtualLink> links = networkService.getAllLinks();
         if(links.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -99,5 +97,15 @@ public class VirtualNodeController {
         networkService.clearAllNodes();
         return ResponseEntity.status(HttpStatus.OK)
                 .body(Map.of("message","가상 네트워크 초기화 작업이 완료 되었습니다."));
+    }
+
+    // 전체 토폴로지를 한번에 조회
+    @GetMapping("/topology")
+    public ResponseEntity<?> getFullTopology() {
+        Map<String, Object> response = Map.of(
+                "nodes", networkService.getAllNodes(),
+                "links", networkService.getAllLinks()
+        );
+        return ResponseEntity.ok(response);
     }
 }
