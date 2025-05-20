@@ -1,5 +1,7 @@
-package com.example.simple_packet_tracer.virtual;
+package com.example.simple_packet_tracer.virtual.controller;
 
+import com.example.simple_packet_tracer.virtual.VirtualLink;
+import com.example.simple_packet_tracer.virtual.VirtualNode;
 import com.example.simple_packet_tracer.virtual.dto.CreateLinkRequestDto;
 import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
 import com.example.simple_packet_tracer.virtual.service.VirtualNetworkService;

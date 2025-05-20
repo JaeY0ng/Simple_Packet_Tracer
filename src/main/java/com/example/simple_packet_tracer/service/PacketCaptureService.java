@@ -26,8 +26,19 @@ public class PacketCaptureService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public List<PcapNetworkInterface> listNetworkInterfaces() throws PcapNativeException {
-        return Pcaps.findAllDevs();
+        List<PcapNetworkInterface> interfaces = Pcaps.findAllDevs();
+        for (PcapNetworkInterface nif : interfaces) {
+            System.out.println("✔️ Name       : " + nif.getName());
+            System.out.println("📝 Description: " + nif.getDescription());
+            System.out.println("🌐 Addresses  : ");
+            for (PcapAddress addr : nif.getAddresses()) {
+                System.out.println("    - " + addr.getAddress());
+            }
+            System.out.println("-------------------------");
+        }
+        return interfaces;
     }
+
 
     public PacketCaptureService(PacketWebSocketHandler webSocketHandler) {
         this.webSocketHandler = webSocketHandler;

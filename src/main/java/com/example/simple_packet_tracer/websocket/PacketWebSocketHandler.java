@@ -30,10 +30,16 @@ public class PacketWebSocketHandler extends TextWebSocketHandler {
     }
 
     public void sendPacketMessage(String message) {
+
+        System.out.println("📤 전송 준비: " + message); // ✅ 로그 추가
+
         for (WebSocketSession session : sessions) {
             try {
                 if (session.isOpen()) {
                     session.sendMessage(new TextMessage(message));
+                    System.out.println("✅ WebSocket 전송 완료");
+                } else{
+                    System.out.println("세션 닫힘 상태");
                 }
             } catch (Exception e) {
                 System.err.println("WebSocket 전송 오류: " + e.getMessage());

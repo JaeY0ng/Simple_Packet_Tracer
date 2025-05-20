@@ -6,11 +6,13 @@ import com.example.simple_packet_tracer.service.PacketCaptureService;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PcapNativeException;
 import org.pcap4j.core.PcapNetworkInterface;
+import org.pcap4j.core.Pcaps;
 import org.pcap4j.packet.Packet;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.Inet4Address;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -27,9 +29,15 @@ public class PacketCaptureController {
 
     @GetMapping("/interface")
     public List<String> listInterfaces() throws Exception{
-        List<PcapNetworkInterface> interfaces = packetCaptureService.listNetworkInterfaces();
-        return interfaces.stream()
-                .map(nif -> nif.getName() + " : " + nif.getDescription())
+        List<PcapNetworkInterface> devs = Pcaps.findAllDevs();
+
+        return devs.stream()
+                .filter(nif -> nif.getAddresses().stream().anyMatch(addr ->
+                        addr.getAddress() != null &&
+                                addr.getAddress() instanceof Inet4Address &&
+                                !addr.getAddress().isLoopbackAddress()
+                ))
+                .map(nif -> nif.getName() + " : " + (nif.getDescription() != null ? nif.getDescription() : "No description"))
                 .collect(Collectors.toList());
     }
 
