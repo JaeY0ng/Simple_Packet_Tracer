@@ -1,4 +1,4 @@
-package com.example.simple_packet_tracer.config;
+package com.example.simple_packet_tracer.websocket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

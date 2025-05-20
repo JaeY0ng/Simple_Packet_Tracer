@@ -3,13 +3,20 @@ package com.example.simple_packet_tracer.virtual.service;
 import com.example.simple_packet_tracer.virtual.VirtualLink;
 import com.example.simple_packet_tracer.virtual.VirtualNode;
 import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
+import com.example.simple_packet_tracer.websocket.dto.WebSocketMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class VirtualNetworkService {
+
+
+    private final SimpMessagingTemplate messagingTemplate;
 
     private final Map<String, VirtualNode> nodeMap = new HashMap<>();
     private final List<VirtualLink> links = new ArrayList<>();
@@ -22,6 +29,8 @@ public class VirtualNetworkService {
         String nodeId = UUID.randomUUID().toString();
         node.setId(nodeId);
         nodeMap.put(nodeId, node);
+
+        broadcastNodeStatus();
         return node;
     }
 
@@ -29,6 +38,7 @@ public class VirtualNetworkService {
         boolean removed = nodeMap.remove(nodeId) != null;
         if (removed) {
             links.removeIf(link -> link.getNodeAId().equals(nodeId) || link.getNodeBId().equals(nodeId));
+            broadcastNodeStatus();
         }
         return removed;
     }
@@ -48,6 +58,8 @@ public class VirtualNetworkService {
         }
         VirtualLink link = new VirtualLink(UUID.randomUUID().toString(), nodeAId, nodeBId);
         links.add(link);
+
+        broadcastNodeStatus();
         return link;
     }
 
@@ -56,7 +68,11 @@ public class VirtualNetworkService {
     }
 
     public boolean deleteLink(String linkId) {
-        return links.removeIf(link -> link.getId().equals(linkId));
+        boolean removed = links.removeIf(link -> link.getId().equals(linkId));
+        if (removed) {
+            broadcastNodeStatus();
+        }
+        return removed;
     }
 
     public List<VirtualLink> getLinksByNode(String nodeId) {
@@ -87,5 +103,12 @@ public class VirtualNetworkService {
         return (int) links.stream()
                 .filter(link -> link.getNodeAId().equals(nodeId) || link.getNodeBId().equals(nodeId))
                 .count();
+    }
+
+    public void broadcastNodeStatus (){
+        List<NodeStatusDto> statusDtoList = getNodeStatusList();
+        WebSocketMessage<List<NodeStatusDto>> message = new WebSocketMessage<>("NODE_STATUS_UPDATED",statusDtoList);
+
+        messagingTemplate.convertAndSend("/topic/nodes/status", message);
     }
 }
