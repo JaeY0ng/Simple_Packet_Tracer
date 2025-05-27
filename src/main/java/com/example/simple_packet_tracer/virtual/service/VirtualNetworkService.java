@@ -1,7 +1,7 @@
 package com.example.simple_packet_tracer.virtual.service;
 
-import com.example.simple_packet_tracer.virtual.VirtualLink;
-import com.example.simple_packet_tracer.virtual.VirtualNode;
+import com.example.simple_packet_tracer.virtual.dto.VirtualLinkDto;
+import com.example.simple_packet_tracer.virtual.dto.VirtualNodeDto;
 import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
 import com.example.simple_packet_tracer.websocket.dto.WebSocketMessage;
 import lombok.RequiredArgsConstructor;
@@ -18,14 +18,14 @@ public class VirtualNetworkService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    private final Map<String, VirtualNode> nodeMap = new HashMap<>();
-    private final List<VirtualLink> links = new ArrayList<>();
+    private final Map<String, VirtualNodeDto> nodeMap = new HashMap<>();
+    private final List<VirtualLinkDto> links = new ArrayList<>();
 
-    public List<VirtualNode> getAllNodes() {
+    public List<VirtualNodeDto> getAllNodes() {
         return new ArrayList<>(nodeMap.values());
     }
 
-    public VirtualNode addNode(VirtualNode node) {
+    public VirtualNodeDto addNode(VirtualNodeDto node) {
         String nodeId = UUID.randomUUID().toString();
         node.setId(nodeId);
         nodeMap.put(nodeId, node);
@@ -43,7 +43,7 @@ public class VirtualNetworkService {
         return removed;
     }
 
-    public Optional<VirtualNode> getNode(String nodeId) {
+    public Optional<VirtualNodeDto> getNode(String nodeId) {
         return Optional.ofNullable(nodeMap.get(nodeId));
     }
 
@@ -52,18 +52,18 @@ public class VirtualNetworkService {
         links.clear();
     }
 
-    public VirtualLink createLink(String nodeAId, String nodeBId) {
+    public VirtualLinkDto createLink(String nodeAId, String nodeBId) {
         if (!nodeMap.containsKey(nodeAId) || !nodeMap.containsKey(nodeBId)) {
             throw new IllegalArgumentException("노드 ID가 유효하지 않습니다.");
         }
-        VirtualLink link = new VirtualLink(UUID.randomUUID().toString(), nodeAId, nodeBId);
+        VirtualLinkDto link = new VirtualLinkDto(UUID.randomUUID().toString(), nodeAId, nodeBId);
         links.add(link);
 
         broadcastNodeStatus();
         return link;
     }
 
-    public List<VirtualLink> getAllLinks() {
+    public List<VirtualLinkDto> getAllLinks() {
         return new ArrayList<>(links);
     }
 
@@ -75,9 +75,9 @@ public class VirtualNetworkService {
         return removed;
     }
 
-    public List<VirtualLink> getLinksByNode(String nodeId) {
-        List<VirtualLink> result = new ArrayList<>();
-        for (VirtualLink link : links) {
+    public List<VirtualLinkDto> getLinksByNode(String nodeId) {
+        List<VirtualLinkDto> result = new ArrayList<>();
+        for (VirtualLinkDto link : links) {
             if (link.getNodeAId().equals(nodeId) || link.getNodeBId().equals(nodeId)) {
                 result.add(link);
             }

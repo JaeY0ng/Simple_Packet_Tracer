@@ -1,4 +1,4 @@
-package com.example.simple_packet_tracer.dto;
+package com.example.simple_packet_tracer.virtual.dto;
 
 
 import lombok.Data;

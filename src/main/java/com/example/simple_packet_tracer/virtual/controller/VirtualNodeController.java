@@ -1,7 +1,7 @@
 package com.example.simple_packet_tracer.virtual.controller;
 
-import com.example.simple_packet_tracer.virtual.VirtualLink;
-import com.example.simple_packet_tracer.virtual.VirtualNode;
+import com.example.simple_packet_tracer.virtual.dto.VirtualLinkDto;
+import com.example.simple_packet_tracer.virtual.dto.VirtualNodeDto;
 import com.example.simple_packet_tracer.virtual.dto.CreateLinkRequestDto;
 import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
 import com.example.simple_packet_tracer.virtual.service.VirtualNetworkService;
@@ -26,7 +26,7 @@ public class VirtualNodeController {
     // 모든 노드 조회
     @GetMapping("/nodes")
     public ResponseEntity<?> getAllNodes() {
-        List<VirtualNode> nodes = networkService.getAllNodes();
+        List<VirtualNodeDto> nodes = networkService.getAllNodes();
         if(nodes.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -38,14 +38,14 @@ public class VirtualNodeController {
 
     // 노드 추가
     @PostMapping("/nodes")
-    public ResponseEntity<VirtualNode> addNode(@RequestBody VirtualNode node) {
+    public ResponseEntity<VirtualNodeDto> addNode(@RequestBody VirtualNodeDto node) {
         return ResponseEntity.ok(networkService.addNode(node));
     }
 
     // 단일 노드 조회
     @GetMapping("/nodes/{id}")
-    public ResponseEntity<VirtualNode> getNode(@PathVariable String id) {
-        Optional<VirtualNode> node = networkService.getNode(id);
+    public ResponseEntity<VirtualNodeDto> getNode(@PathVariable String id) {
+        Optional<VirtualNodeDto> node = networkService.getNode(id);
         return node.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -65,15 +65,15 @@ public class VirtualNodeController {
 
     // 링크 생성
     @PostMapping("/links")
-    public ResponseEntity<VirtualLink> createLink(@RequestBody CreateLinkRequestDto request) {
-        VirtualLink link = networkService.createLink(request.getNodeAId(), request.getNodeBId());
+    public ResponseEntity<VirtualLinkDto> createLink(@RequestBody CreateLinkRequestDto request) {
+        VirtualLinkDto link = networkService.createLink(request.getNodeAId(), request.getNodeBId());
         return new ResponseEntity<>(link, HttpStatus.CREATED);
     }
 
     // 모든 링크 조회
     @GetMapping("/links")
     public ResponseEntity<?> getAllLinks() {
-        List<VirtualLink> links = networkService.getAllLinks();
+        List<VirtualLinkDto> links = networkService.getAllLinks();
         if(links.isEmpty()){
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
@@ -84,7 +84,7 @@ public class VirtualNodeController {
 
     // 노드와 연결된 링크 조회
     @GetMapping("/nodes/{id}/links")
-    public List<VirtualLink> getLinksByNode(@PathVariable String id) {
+    public List<VirtualLinkDto> getLinksByNode(@PathVariable String id) {
         return networkService.getLinksByNode(id);
     }
 

@@ -1,4 +1,4 @@
-package com.example.simple_packet_tracer.virtual;
+package com.example.simple_packet_tracer.virtual.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VirtualNode {
+public class VirtualNodeDto {
     private String id;
     private String name;
 //    private String type; // PC, ROUTER
