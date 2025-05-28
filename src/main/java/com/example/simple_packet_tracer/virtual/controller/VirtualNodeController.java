@@ -5,6 +5,7 @@ import com.example.simple_packet_tracer.virtual.dto.VirtualNodeDto;
 import com.example.simple_packet_tracer.virtual.dto.CreateLinkRequestDto;
 import com.example.simple_packet_tracer.virtual.dto.NodeStatusDto;
 import com.example.simple_packet_tracer.virtual.service.VirtualNetworkService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +16,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/virtual")
+@RequiredArgsConstructor
 public class VirtualNodeController {
 
     private final VirtualNetworkService networkService;
-
-    public VirtualNodeController(VirtualNetworkService networkService) {
-        this.networkService = networkService;
-    }
 
     // 모든 노드 조회
     @GetMapping("/nodes")
