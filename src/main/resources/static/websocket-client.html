@@ -12,7 +12,7 @@
         }
         .log-container {
             display: flex;
-            gap: 20px;
+            gap: 5px;
             margin-top: 20px;
         }
         #log, #nodeLog {
@@ -25,14 +25,14 @@
             overflow-y: auto;
         }
         select, input, button {
-            margin-right: 10px;
-            margin-top: 10px;
+            margin-right: 5px;
+            margin-top: 5px;
             padding: 4px;
         }
     </style>
 </head>
 <body>
-<h2>📡 실시간 패킷 로그</h2>
+<h3>📡 실시간 패킷 로그</h3>
 
 <!-- 인터페이스 선택 -->
 <button onclick="loadInterfaces()">인터페이스 조회</button>
@@ -40,7 +40,7 @@
     <option disabled selected>인터페이스 선택</option>
 </select>
 
-<!-- 필터 입력 -->
+<!-- 필터 입력 ( 공백은 전체 ) -->
 <input type="text" id="filterInput" placeholder="ex: tcp, udp, port 53" />
 <button onclick="startCapture()">캡처 시작</button>
 
@@ -49,15 +49,30 @@
 <input type="text" id="pingTarget" placeholder="Target Node ID">
 <button onclick="simulatePing()">Ping 요청</button>
 
-<!-- 토폴로지 보기 버튼 -->
+<!-- 토폴로지 버튼 -->
 <button onclick="loadTopology()">🔍 토폴로지 보기</button>
 
 
-<h3>노드 추가</h3>
-<input type="text" id="newNodeName" placeholder="노드 이름" />
-<input type="text" id="newNodeIp" placeholder="IP 주소 (예: 192.168.0.1)" />
+<h3>➕ 가상 노드 추가</h3>
+<input type="text" id="newNodeName" placeholder="노드 명" />
+<input type="text" id="newNodeIp" placeholder="IP 주소" />
 <button onclick="addNode()">노드 생성</button>
 
+
+<h3>🗑️ 노드 삭제</h3>
+<input type="text" id="deleteNodeId" placeholder="노드 ID" />
+<button onclick="deleteNode()">노드 삭제</button>
+
+
+<h3>🔗 링크 생성</h3>
+<input type="text" id="linkA" placeholder="노드 A ID" />
+<input type="text" id="linkB" placeholder="노드 B ID" />
+<button onclick="createLink()">링크 생성</button>
+
+
+<h3>❌ 링크 삭제</h3>
+<input type="text" id="deleteLinkId" placeholder="링크 ID" />
+<button onclick="deleteLink()">링크 삭제</button>
 
 <!-- 로그 출력 영역을 좌우 배치 -->
 <div class="log-container">
@@ -276,12 +291,90 @@
         fetch("http://localhost:8081/api/virtual/topology")
             .then(res => res.json())
             .then(data => {
-                const lines = [" 현재 토폴로지 상태"];
+                const lines = ["📑 현재 토폴로지 상태"];
                 data.nodes.forEach(n => lines.push(`노드: ${n.id}, 이름: ${n.name}`));
                 data.links.forEach(l => lines.push(`링크: ${l.id}, ${l.nodeAId} ↔ ${l.nodeBId}`));
                 logToNode(lines.join('\n'));
             })
-            .catch(err => logToNode("토폴로지 조회 실패: " + err.message));
+            .catch(err => logToNode("❗ 토폴로지 조회 실패: " + err.message));
+    }
+
+    // 가상 노드 추가
+    function addNode() {
+        const name = document.getElementById("newNodeName").value.trim();
+        const ip = document.getElementById("newNodeIp").value.trim();
+
+        if (!name || !ip) {
+            alert("노드 이름과 IP 주소를 모두 입력해주세요.");
+            return;
+        }
+
+        fetch("http://localhost:8081/api/virtual/nodes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, ipAddress: ip })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("❗ 노드 생성 실패");
+                return res.json();
+            })
+            .then(data => {
+                logToNode(`노드 생성됨: ID=${data.id}, 이름=${data.name}, IP=${data.ipAddress}`);
+                loadTopology(); // 최신 토폴로지 갱신
+            })
+            .catch(err => {
+                logToNode("❗ 노드 생성 실패: " + err.message);
+            });
+    }
+
+    // 가상 노드 삭제
+    function deleteNode() {
+        const nodeId = document.getElementById("deleteNodeId").value.trim();
+        if (!nodeId) return alert("노드 ID를 입력해주세요.");
+
+        fetch(`http://localhost:8081/api/virtual/nodes/${nodeId}`, {
+            method: "DELETE"
+        })
+            .then(res => res.json())
+            .then(data => {
+                logToNode(`🗑️ ${data.message}`);
+                loadTopology();
+            })
+            .catch(err => logToNode("❌ 노드 삭제 실패: " + err.message));
+    }
+
+    // 링크 생성
+    function createLink() {
+        const a = document.getElementById("linkA").value.trim();
+        const b = document.getElementById("linkB").value.trim();
+        if (!a || !b) return alert("두 노드 ID를 모두 입력해주세요.");
+
+        fetch("http://localhost:8081/api/virtual/links", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nodeAId: a, nodeBId: b })
+        })
+            .then(res => res.json())
+            .then(data => {
+                logToNode(`🔗 링크 생성됨: ${data.nodeAId} ↔ ${data.nodeBId}`);
+                loadTopology();
+            })
+            .catch(err => logToNode("❌ 링크 생성 실패: " + err.message));
+    }
+
+    //링크 삭제
+    function deleteLink() {
+        const linkId = document.getElementById("deleteLinkId").value.trim();
+        if (!linkId) return alert("링크 ID를 입력해주세요.");
+
+        fetch(`http://localhost:8081/api/virtual/links/${linkId}`, {
+            method: "DELETE"
+        })
+            .then(() => {
+                logToNode(`⭕ 링크 삭제 완료: ${linkId}`);
+                loadTopology();
+            })
+            .catch(err => logToNode("❌ 링크 삭제 실패: " + err.message));
     }
 </script>
 </body>
