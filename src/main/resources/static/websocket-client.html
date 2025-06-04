@@ -44,19 +44,18 @@
 <input type="text" id="filterInput" placeholder="ex: tcp, udp, port 53" />
 <button onclick="startCapture()">캡처 시작</button>
 
-<h3>📨 Ping 시뮬레이션</h3>
-<input type="text" id="pingSource" placeholder="Source Node ID">
-<input type="text" id="pingTarget" placeholder="Target Node ID">
-<button onclick="simulatePing()">Ping 요청</button>
-
 <!-- 토폴로지 버튼 -->
 <button onclick="loadTopology()">🔍 토폴로지 보기</button>
-
 
 <h3>➕ 가상 노드 추가</h3>
 <input type="text" id="newNodeName" placeholder="노드 명" />
 <input type="text" id="newNodeIp" placeholder="IP 주소" />
 <button onclick="addNode()">노드 생성</button>
+
+<h3>📨 Ping 시뮬레이션</h3>
+<input type="text" id="pingSource" placeholder="Source Node ID">
+<input type="text" id="pingTarget" placeholder="Target Node ID">
+<button onclick="simulatePing()">Ping 요청</button>
 
 
 <h3>🗑️ 노드 삭제</h3>
