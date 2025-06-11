@@ -87,7 +87,7 @@
     let socket;
 
     function loadInterfaces() {
-        fetch("http://15.164.234.37:8081/interface")
+        fetch("http://15.164.219.221:8081/interface")
             .then(res => {
                 if (!res.ok) throw new Error(`응답 오류 (${res.status})`);
                 return res.json();
@@ -121,7 +121,7 @@
         document.getElementById("log").innerHTML = "";
 
         // 캡처 요청
-        fetch(`http://15.164.234.37:8081/capture?interfaceName=${encodeURIComponent(selectedInterface)}&bpfFilter=${encodeURIComponent(filter)}`)
+        fetch(`http://15.164.219.221:8081/capture?interfaceName=${encodeURIComponent(selectedInterface)}&bpfFilter=${encodeURIComponent(filter)}`)
             .then(res => {
                 if (!res.ok) throw new Error(`캡처 요청 실패 (${res.status})`);
                 log("📤 캡처 요청 전송됨. WebSocket 수신 대기 중...");
@@ -137,7 +137,7 @@
             socket.close();
         }
 
-        socket = new WebSocket("ws://15.164.234.37:8081/packets");
+        socket = new WebSocket("ws://15.164.219.221:8081/packets");
 
         socket.onopen = () => {
             log("✅ WebSocket 연결됨");
@@ -263,7 +263,7 @@
             return;
         }
 
-        fetch("http://15.164.234.37:8081/api/simulate/ping", {
+        fetch("http://15.164.219.221:8081/api/simulate/ping", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sourceNodeId: source, targetNodeId: target })
@@ -287,7 +287,7 @@
 
     // 토폴로지 조회 함수
     function loadTopology() {
-        fetch("http://15.164.234.37:8081/api/virtual/topology")
+        fetch("http://15.164.219.221:8081/api/virtual/topology")
             .then(res => res.json())
             .then(data => {
                 const lines = ["📑 현재 토폴로지 상태"];
@@ -308,7 +308,7 @@
             return;
         }
 
-        fetch("http://15.164.234.37:8081/api/virtual/nodes", {
+        fetch("http://15.164.219.221:8081/api/virtual/nodes", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name, ipAddress: ip })
@@ -331,7 +331,7 @@
         const nodeId = document.getElementById("deleteNodeId").value.trim();
         if (!nodeId) return alert("노드 ID를 입력해주세요.");
 
-        fetch(`http://15.164.234.37:8081/api/virtual/nodes/${nodeId}`, {
+        fetch(`http://15.164.219.221:8081/api/virtual/nodes/${nodeId}`, {
             method: "DELETE"
         })
             .then(res => res.json())
@@ -348,7 +348,7 @@
         const b = document.getElementById("linkB").value.trim();
         if (!a || !b) return alert("두 노드 ID를 모두 입력해주세요.");
 
-        fetch("http://15.164.234.37:8081/api/virtual/links", {
+        fetch("http://15.164.219.221:8081/api/virtual/links", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ nodeAId: a, nodeBId: b })
@@ -366,7 +366,7 @@
         const linkId = document.getElementById("deleteLinkId").value.trim();
         if (!linkId) return alert("링크 ID를 입력해주세요.");
 
-        fetch(`http://15.164.234.37:8081/api/virtual/links/${linkId}`, {
+        fetch(`http://15.164.219.221:8081/api/virtual/links/${linkId}`, {
             method: "DELETE"
         })
             .then(() => {
