@@ -268,7 +268,7 @@
             return;
         }
 
-        fetch(``${window.BACKEND_URL}/api/simulate/ping`, {
+        fetch(`${window.BACKEND_URL}/api/simulate/ping`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sourceNodeId: source, targetNodeId: target })
@@ -292,7 +292,7 @@
 
     // 토폴로지 조회 함수
     function loadTopology() {
-        fetch(`${window.BACKEND_URL}/ws`)
+        fetch(`${window.BACKEND_URL}/api/virtual/topology`)
             .then(res => res.json())
             .then(data => {
                 const lines = ["📑 현재 토폴로지 상태"];
