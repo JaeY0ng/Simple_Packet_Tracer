@@ -46,36 +46,36 @@
 </select>
 
 <!-- 필터 입력 ( 공백은 전체 ) -->
-<input type="text" id="filterInput" placeholder="ex: tcp, udp, port 53" />
+<input id="filterInput" placeholder="ex: tcp, udp, port 53" type="text"/>
 <button onclick="startCapture()">캡처 시작</button>
 
 <!-- 토폴로지 버튼 -->
 <button onclick="loadTopology()">🔍 토폴로지 보기</button>
 
 <h3>➕ 가상 노드 추가</h3>
-<input type="text" id="newNodeName" placeholder="노드 명" />
-<input type="text" id="newNodeIp" placeholder="IP 주소" />
+<input id="newNodeName" placeholder="노드 명" type="text"/>
+<input id="newNodeIp" placeholder="IP 주소" type="text"/>
 <button onclick="addNode()">노드 생성</button>
 
 <h3>📨 Ping 시뮬레이션</h3>
-<input type="text" id="pingSource" placeholder="Source Node ID">
-<input type="text" id="pingTarget" placeholder="Target Node ID">
+<input id="pingSource" placeholder="Source Node ID" type="text">
+<input id="pingTarget" placeholder="Target Node ID" type="text">
 <button onclick="simulatePing()">Ping 요청</button>
 
 
 <h3>🗑️ 노드 삭제</h3>
-<input type="text" id="deleteNodeId" placeholder="노드 ID" />
+<input id="deleteNodeId" placeholder="노드 ID" type="text"/>
 <button onclick="deleteNode()">노드 삭제</button>
 
 
 <h3>🔗 링크 생성</h3>
-<input type="text" id="linkA" placeholder="노드 A ID" />
-<input type="text" id="linkB" placeholder="노드 B ID" />
+<input id="linkA" placeholder="노드 A ID" type="text"/>
+<input id="linkB" placeholder="노드 B ID" type="text"/>
 <button onclick="createLink()">링크 생성</button>
 
 
 <h3>❌ 링크 삭제</h3>
-<input type="text" id="deleteLinkId" placeholder="링크 ID" />
+<input id="deleteLinkId" placeholder="링크 ID" type="text"/>
 <button onclick="deleteLink()">링크 삭제</button>
 
 <!-- 로그 출력 영역을 좌우 배치 -->
@@ -102,10 +102,10 @@
                 select.innerHTML = '<option disabled selected>인터페이스 선택</option>';
                 data.forEach((iface) => {
                     const option = document.createElement("option");
-                    option.value = iface.split(" : ")[0];
-                    option.textContent = iface;
+                    option.value = iface.name;
+                    option.textContent = `${iface.name} : ${iface.description}`;
                     select.appendChild(option);
-                });
+});
                 log("✅ 인터페이스 목록 로딩 완료");
             })
             .catch(err => {
