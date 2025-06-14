@@ -2,6 +2,7 @@ package com.example.simple_packet_tracer.controller;
 
 
 import com.example.simple_packet_tracer.dto.LayeredPacketDto;
+import com.example.simple_packet_tracer.dto.NetworkInterfaceDto;
 import com.example.simple_packet_tracer.service.PacketCaptureService;
 import org.pcap4j.core.NotOpenException;
 import org.pcap4j.core.PcapNativeException;
@@ -28,7 +29,7 @@ public class PacketCaptureController {
     }
 
     @GetMapping("/interface")
-    public List<String> listInterfaces() throws Exception{
+    public List<NetworkInterfaceDto> listInterfaces() throws Exception {
         List<PcapNetworkInterface> devs = Pcaps.findAllDevs();
 
         return devs.stream()
@@ -37,7 +38,14 @@ public class PacketCaptureController {
                                 addr.getAddress() instanceof Inet4Address &&
                                 !addr.getAddress().isLoopbackAddress()
                 ))
-                .map(nif -> nif.getName() + " : " + (nif.getDescription() != null ? nif.getDescription() : "No description"))
+                .map(nif -> new NetworkInterfaceDto(
+                        nif.getName(),
+                        nif.getDescription() != null ? nif.getDescription() : "No description",
+                        nif.isLoopBack(),
+                        nif.getAddresses().stream()
+                                .map(addr -> addr.getAddress().getHostAddress())
+                                .collect(Collectors.toList())
+                ))
                 .collect(Collectors.toList());
     }
 
