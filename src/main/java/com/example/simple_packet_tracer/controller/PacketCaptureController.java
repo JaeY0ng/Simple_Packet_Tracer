@@ -4,10 +4,7 @@ package com.example.simple_packet_tracer.controller;
 import com.example.simple_packet_tracer.dto.LayeredPacketDto;
 import com.example.simple_packet_tracer.dto.NetworkInterfaceDto;
 import com.example.simple_packet_tracer.service.PacketCaptureService;
-import org.pcap4j.core.NotOpenException;
-import org.pcap4j.core.PcapNativeException;
-import org.pcap4j.core.PcapNetworkInterface;
-import org.pcap4j.core.Pcaps;
+import org.pcap4j.core.*;
 import org.pcap4j.packet.Packet;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -31,6 +28,19 @@ public class PacketCaptureController {
     @GetMapping("/interface")
     public List<NetworkInterfaceDto> listInterfaces() throws Exception {
         List<PcapNetworkInterface> devs = Pcaps.findAllDevs();
+
+        for (PcapNetworkInterface nif : devs) {
+            System.out.println("Interface: " + nif.getName());
+            System.out.println("Description: " + (nif.getDescription() != null ? nif.getDescription() : "No description"));
+            System.out.println("Loopback: " + nif.isLoopBack());
+            System.out.println("Addresses:");
+            for (PcapAddress addr : nif.getAddresses()) {
+                if (addr.getAddress() != null) {
+                    System.out.println("    - " + addr.getAddress().getHostAddress());
+                }
+            }
+            System.out.println("---------------");
+        }
 
         return devs.stream()
                 .filter(nif -> nif.getAddresses().stream().anyMatch(addr ->
