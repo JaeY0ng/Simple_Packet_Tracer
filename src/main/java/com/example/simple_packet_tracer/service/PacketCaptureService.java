@@ -5,6 +5,7 @@ import com.example.simple_packet_tracer.websocket.PacketWebSocketHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -88,7 +89,7 @@ public class PacketCaptureService {
         ExecutorService captureExecutor = Executors.newSingleThreadExecutor();
         Future<?> future = captureExecutor.submit(() -> {
             try {
-                handle.loop(MAX_PACKET_COUNT, listener);
+                handle.loop(MAX_PACKET_COUNT, listener); // 블로킹 캡처
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -212,5 +213,14 @@ public class PacketCaptureService {
             }
         }
         return dto;
+    }
+
+    @Async("taskExecutor") // 메서드 비동기 실행 표시
+    public void capturePacketAsync(String interfaceName, String bpfFilter) {
+        try {
+            capturePackets(interfaceName, bpfFilter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

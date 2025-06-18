@@ -6,6 +6,7 @@ import com.example.simple_packet_tracer.dto.NetworkInterfaceDto;
 import com.example.simple_packet_tracer.service.PacketCaptureService;
 import org.pcap4j.core.*;
 import org.pcap4j.packet.Packet;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -61,14 +62,18 @@ public class PacketCaptureController {
 
 
     @GetMapping("/capture")
-    public List<LayeredPacketDto> capturePackets(
-            @RequestParam String interfaceName,
-            @RequestParam(required = false) String bpfFilter
+    public ResponseEntity<String> capturePackets(
+            @RequestParam String interfaceName, // 인터페이스 이름 필수
+            @RequestParam(required = false) String bpfFilter // bpfFilter 는 선택
     ) throws PcapNativeException, NotOpenException, InterruptedException {
         // 필터 디코딩
         String decodedFilter = bpfFilter != null ? URLDecoder.decode(bpfFilter, StandardCharsets.UTF_8) : null;
 
-        System.out.println("🎯 클라이언트 필터 값: " + decodedFilter); // 디버그용
-        return packetCaptureService.capturePackets(interfaceName, decodedFilter);
+        System.out.println("캡처 요청 시작 : " + interfaceName + ", 필터 : " + decodedFilter); // 디버그용
+
+        // 실제 캡처 작업 백그라운드 실행
+        packetCaptureService.capturePacketAsync(interfaceName, decodedFilter);
+
+        return ResponseEntity.ok("캡처 요청 확인. 백그라운드 실행 중");
     }
 }
